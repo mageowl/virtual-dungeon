@@ -10,9 +10,6 @@
     devShell.${system} = pkgs.mkShell {
       name = "macroquad-shell";
       buildInputs = with pkgs; [
-        cargo-cross
-        podman
-
         libGL
         xorg.libX11
         xorg.libXi

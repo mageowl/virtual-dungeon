@@ -1,9 +1,10 @@
 use super::grid::{Grid, Rect, Tile};
 
+// const BST_MAX_DEPTH: usize = 4;
+// const BST_MIN_DEPTH: usize = 3;
 const BST_MAX_DEPTH: usize = 8;
-/// After `BST_MIN_DEPTH` each depth has a 1/3 chance to stop.
 const BST_MIN_DEPTH: usize = 7;
-const MIN_ROOM_SIZE: usize = 6;
+const MIN_ROOM_SIZE: usize = 10;
 
 impl Grid {
     pub(super) fn gen_bst(&mut self, rect: Rect, depth: usize) {

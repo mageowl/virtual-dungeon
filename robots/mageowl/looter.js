@@ -25,6 +25,13 @@ while (true) {
     await robot.move(direction);
   }
 
+  switch (direction) {
+    case "up": direction = "right"; break;
+    case "left": direction = "up"; break;
+    case "down": direction = "left"; break;
+    case "right": direction = "down"; break;
+  }
+
   // Scan the board for a target
   let i = 0;
   let targetX, targetY;

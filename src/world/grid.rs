@@ -11,6 +11,8 @@ use macroquad::{
 
 pub const GRID_WIDTH: usize = 80;
 pub const GRID_HEIGHT: usize = 60;
+// pub const GRID_WIDTH: usize = 40;
+// pub const GRID_HEIGHT: usize = 30;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum Tile {
