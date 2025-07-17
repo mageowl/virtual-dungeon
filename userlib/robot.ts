@@ -30,6 +30,12 @@ export async function scan(x: number, y: number): Promise<Tile> {
   return tile;
 }
 
+export function sleep(ms: number) {
+  return new Promise((res) => {
+    setTimeout(res, ms);
+  });
+}
+
 export function dirToCoords(dir: Direction) {
   switch (dir) {
     case "up":

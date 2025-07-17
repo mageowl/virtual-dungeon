@@ -48,8 +48,8 @@ while (true) {
 
     // Every 7 steps
     if (i % 7 == 0) {
-      for (let x = -3; x <= 3; x++) {
-        for (let y = -3; y <= 3; y++) {
+      for (let x = -2; x <= 2; x++) {
+        for (let y = -2; y <= 2; y++) {
           if (x == 0 && y == 0) continue;
           switch (await robot.scan(x, y)) {
             case "robot":
@@ -64,10 +64,10 @@ while (true) {
     i++;
   }
 
-  while (targetX != null) {
-    // Chase down the target
-    console.log("Stage 3 started");
+  // Chase down the target
+  console.log("Stage 3 started");
 
+  while (targetX != null) {
     while (targetX !== 0) {
       if (targetX < 0) {
         targetX += 1;

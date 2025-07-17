@@ -25,19 +25,25 @@ pub enum State {
     Dying(f32),
 }
 
+struct ScanVisual {
+    offset: (i8, i8),
+    time: f32,
+}
+
 pub struct Character {
     reciever: Receiver<Request>,
     stdin: ChildStdin,
     process: Child,
 
-    label_size: TextDimensions,
-    name: String,
-    color: Color,
     state: State,
-
     tile_pos: (usize, usize),
     x: f32,
     y: f32,
+
+    label_size: TextDimensions,
+    name: String,
+    color: Color,
+    scan_visuals: Vec<ScanVisual>,
 }
 
 impl Character {
@@ -72,6 +78,11 @@ impl Character {
             stdin: process.stdin.take()?,
             process,
 
+            state: State::WaitingForRequest,
+            tile_pos,
+            x: tile_pos.0 as f32,
+            y: tile_pos.1 as f32,
+
             label_size: measure_text(&file_name, None, Self::LABEL_FONT_SIZE, 1.0),
             name: file_name,
             color: Color {
@@ -80,11 +91,7 @@ impl Character {
                 b: b as f32 / 255.0,
                 a: 1.0,
             },
-            state: State::WaitingForRequest,
-
-            tile_pos,
-            x: tile_pos.0 as f32,
-            y: tile_pos.1 as f32,
+            scan_visuals: Vec::new(),
         })
     }
 
@@ -124,8 +131,6 @@ impl Character {
                     }
                 }
                 Ok(Request::Scan(x, y)) => {
-                    // self.state = State::Timeout(0.1);
-
                     if x > 3 || x < -3 || y > 3 || y < -3 {
                         println!(
                             "[\x1b[33m{}\x1b[0m] Tried to scan out of bounds.",
@@ -133,6 +138,10 @@ impl Character {
                         );
                         let _ = self.stdin.write(b"invalid\n");
                     } else {
+                        self.scan_visuals.push(ScanVisual {
+                            offset: (x, y),
+                            time: 0.3,
+                        });
                         let tile = grid.get(
                             (self.tile_pos.0 as i8 + x).max(0).min(GRID_WIDTH as i8 - 1) as usize,
                             (self.tile_pos.1 as i8 + y)
@@ -144,7 +153,10 @@ impl Character {
                 }
 
                 Err(TryRecvError::Empty) => (),
-                Err(TryRecvError::Disconnected) => self.state = State::Dying(-20.0),
+                Err(TryRecvError::Disconnected) => {
+                    *grid.get_mut(self.tile_pos.0, self.tile_pos.1) = Tile::Empty;
+                    self.state = State::Dying(-20.0);
+                }
             },
             State::Timeout(time, should_msg) => {
                 *time -= get_frame_time();
@@ -161,6 +173,11 @@ impl Character {
                 *vy += 100.0 * get_frame_time();
             }
         }
+
+        self.scan_visuals.retain_mut(|sv| {
+            sv.time -= get_frame_time();
+            sv.time > 0.0
+        });
     }
 
     const LABEL_FONT_SIZE: u16 = 16;
@@ -168,14 +185,17 @@ impl Character {
         let dx = self.x * grid.tw();
         let dy = self.y * grid.th();
         draw_rectangle(dx, dy, grid.tw(), grid.th(), self.color);
-        draw_rectangle_lines(
-            dx - 3.0 * grid.tw(),
-            dy - 3.0 * grid.th(),
-            grid.tw() * 7.0,
-            grid.th() * 7.0,
-            3.0,
-            self.color,
-        );
+
+        if !matches!(self.state, State::Dying(_)) {
+            draw_rectangle_lines(
+                dx - 3.0 * grid.tw(),
+                dy - 3.0 * grid.th(),
+                grid.tw() * 7.0,
+                grid.th() * 7.0,
+                3.0,
+                self.color,
+            );
+        }
 
         draw_text(
             &self.name,
@@ -184,6 +204,16 @@ impl Character {
             Self::LABEL_FONT_SIZE as f32,
             self.color,
         );
+
+        for sv in &self.scan_visuals {
+            let color = Color {
+                a: sv.time,
+                ..self.color
+            };
+            let dx = dx + (sv.offset.0) as f32 * grid.tw();
+            let dy = dy + (sv.offset.1) as f32 * grid.th();
+            draw_rectangle(dx, dy, grid.tw(), grid.th(), color);
+        }
     }
 }
 
