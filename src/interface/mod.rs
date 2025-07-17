@@ -12,7 +12,7 @@ pub fn spawn_from_file(file_name: &str) -> Option<Child> {
     let mut cmd;
     match path.extension().and_then(OsStr::to_str) {
         Some("js") => {
-            cmd = Command::new("node");
+            cmd = Command::new("deno");
             cmd.arg(file_name);
         }
         Some("java") => {

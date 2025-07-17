@@ -1,7 +1,7 @@
 // scanner.js by @mageowl
 // https://mageowl.dev
 
-import * as robot from "../userlib/robot.js";
+import * as robot from "../../userlib/robot.ts";
 
 function dirToTangent(dir) {
   switch (dir) {
