@@ -3,15 +3,15 @@
 
   inputs.nixpkgs.url = "nixpkgs/nixpkgs-unstable";
 
-  outputs = inputs: let
+  outputs = {nixpkgs, ...}: let
     system = "x86_64-linux";
-    pkgs = inputs.nixpkgs.legacyPackages.${system};
+    pkgs = nixpkgs.legacyPackages.${system};
   in {
     devShell.${system} = pkgs.mkShell {
       name = "macroquad-shell";
       buildInputs = with pkgs; [
-        rustc
-        cargo
+        cargo-cross
+        podman
 
         libGL
         xorg.libX11

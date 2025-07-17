@@ -13,11 +13,7 @@ use macroquad::{
 };
 
 use super::grid::{self, GRID_HEIGHT, GRID_WIDTH, Grid, Tile};
-use crate::interface::{
-    handler::spawn_handler,
-    request::{Direction, Request},
-    spawn_from_file,
-};
+use crate::interface::{handler::spawn_handler, request::Request, spawn_from_file};
 
 pub enum State {
     WaitingForRequest,
@@ -36,6 +32,7 @@ pub struct Character {
     process: Child,
 
     state: State,
+    points: u32,
     tile_pos: (usize, usize),
     x: f32,
     y: f32,
@@ -79,6 +76,7 @@ impl Character {
             process,
 
             state: State::WaitingForRequest,
+            points: 0,
             tile_pos,
             x: tile_pos.0 as f32,
             y: tile_pos.1 as f32,
@@ -111,8 +109,11 @@ impl Character {
 
                     *grid.get_mut(self.tile_pos.0, self.tile_pos.1) = Tile::Empty;
                     self.tile_pos += dir;
-                    if *grid.get(self.tile_pos.0, self.tile_pos.1) != Tile::Empty {
-                        self.tile_pos -= dir;
+                    let tile = *grid.get(self.tile_pos.0, self.tile_pos.1);
+                    match tile {
+                        Tile::Empty => (),
+                        Tile::Coins => self.points += 2,
+                        _ => self.tile_pos -= dir,
                     }
                     *grid.get_mut(self.tile_pos.0, self.tile_pos.1) = Tile::Character;
                 }
@@ -121,6 +122,7 @@ impl Character {
                     if matches!(grid.get(target.0, target.1), Tile::Character) {
                         *grid.get_mut(target.0, target.1) = Tile::Empty;
                         self.state = State::Timeout(0.5, true);
+                        self.points += 3;
                     } else {
                         println!(
                             "[\x1b[33m{}\x1b[0m] Tried to attack empty space.",
@@ -214,6 +216,19 @@ impl Character {
             let dy = dy + (sv.offset.1) as f32 * grid.th();
             draw_rectangle(dx, dy, grid.tw(), grid.th(), color);
         }
+    }
+
+    pub fn name(&self) -> &String {
+        &self.name
+    }
+    pub fn color(&self) -> &Color {
+        &self.color
+    }
+    pub fn points(&self) -> &u32 {
+        &self.points
+    }
+    pub fn is_dead(&self) -> bool {
+        matches!(self.state, State::Dying(_))
     }
 }
 

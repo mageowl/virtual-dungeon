@@ -17,7 +17,7 @@ pub fn spawn_from_file(file_name: &str) -> Option<Child> {
         }
         Some("java") => {
             cmd = Command::new("java");
-            cmd.args(["-cp", "userlib", file_name]);
+            cmd.args(["-cp", "userlib/java", file_name]);
         }
         Some(e) => {
             println!("[\x1b[31m{file_name}\x1b[0m] Unknown file extension: {e}");

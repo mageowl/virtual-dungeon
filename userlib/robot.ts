@@ -9,24 +9,24 @@ const rl = createInterface({
 });
 
 type Direction = "up" | "down" | "left" | "right";
-type Tile = "empty" | "robot" | "wall";
+type Tile = "empty" | "robot" | "wall" | "coins";
 
 export async function move(dir: Direction) {
   console.log(`\0move ${dir}`);
   const [res] = await once(rl, "line");
-  if (res != "done") console.error("Failed to finish move.");
+  if (res !== "done") console.error("Failed to finish move.");
 }
 
 export async function attack(dir: Direction) {
   console.log(`\0attack ${dir}`);
   const [res] = await once(rl, "line");
-  if (res != "done") console.error("Failed to finish attack.");
+  if (res !== "done") console.error("Failed to finish attack.");
 }
 
 export async function scan(x: number, y: number): Promise<Tile> {
   console.log(`\0scan ${x} ${y}`);
   const [res, tile] = (await once(rl, "line"))[0].split(" ");
-  if (res != "tile") console.error("Failed to finish scan.");
+  if (res !== "tile") console.error("Failed to finish scan.");
   return tile;
 }
 

@@ -1,4 +1,4 @@
-// lurker.js by @mageowl
+// radar.js by @mageowl
 // https://mageowl.dev
 
 import * as robot from "../../userlib/robot.ts";
@@ -45,14 +45,13 @@ async function chase() {
     
     // Make sure we actually killed the target
     targetX = null;
-    for (let x = -3; x <= 3; x++) {
-      for (let y = -3; y <= 3; y++) {
+    for (let x = -1; x <= 1; x++) {
+      for (let y = -1; y <= 1; y++) {
         if (x == 0 && y == 0) continue;
-        switch (await robot.scan(x, y)) {
-          case "robot":
-            targetX = x;
-            targetY = y;
-            break;
+        if (await robot.scan(x, y) === "robot") {
+          targetX = x;
+          targetY = y;
+          break;
         }
       }
     }
@@ -74,18 +73,19 @@ while (true) {
 
   let xPositions = [];
   let yPositions = [];
-  for (let x = -2; x <= 2; x++) {
-    for (let y = -2; y <= 2; y++) {
+  for (let x = -3; x <= 3; x++) {
+    if (Math.abs(x) === 3 && await robot.scan(Math.sign(x), 0) === "wall") continue;
+    for (let y = -3; y <= 3; y++) {
+      if (Math.abs(y) === 3 && await robot.scan(0, Math.sign(y)) === "wall") continue;
       if (x == 0 && y == 0) continue;
+
       let scan = await robot.scan(x, y); 
       if (scan === "robot") {
         targetX = x;
         targetY = y
         await chase();
       }
-      if (scan !== "wall") {
-        // if (Math.abs(x) === 3 && await robot.scan(Math.sign(x), 0) === "wall") continue;
-        // if (Math.abs(y) === 3 && await robot.scan(0, Math.sign(y)) === "wall") continue;
+      if (scan !== "wall" && (Math.abs(x) === 3 || Math.abs(y) === 3)) {
         
         xPositions.push(x);
         yPositions.push(y);

@@ -1,8 +1,8 @@
 use super::grid::{Grid, Rect, Tile};
 
-const BST_MAX_DEPTH: usize = 4;
+const BST_MAX_DEPTH: usize = 8;
 /// After `BST_MIN_DEPTH` each depth has a 1/3 chance to stop.
-const BST_MIN_DEPTH: usize = 1;
+const BST_MIN_DEPTH: usize = 7;
 const MIN_ROOM_SIZE: usize = 6;
 
 impl Grid {
@@ -21,6 +21,12 @@ impl Grid {
             for y in rect.y + 1..rect.y + rect.h - 1 {
                 *self.get_mut(rect.x, y) = Tile::Wall;
                 *self.get_mut(rect.x + rect.w - 1, y) = Tile::Wall;
+            }
+            while rand::random_bool(0.5) {
+                *self.get_mut(
+                    rand::random_range(rect.x + 1..rect.x + rect.w - 1),
+                    rand::random_range(rect.y + 1..rect.y + rect.h - 1),
+                ) = Tile::Coins;
             }
         } else {
             let split = rand::random_range(MIN_ROOM_SIZE..=size - MIN_ROOM_SIZE);

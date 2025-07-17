@@ -2,18 +2,22 @@ use std::fmt::Display;
 
 use macroquad::{
     color,
-    shapes::draw_rectangle,
+    math::Vec2,
+    shapes::{draw_circle, draw_rectangle},
+    text::draw_text,
+    texture::{DrawTextureParams, Texture2D, draw_texture, draw_texture_ex, load_texture},
     window::{screen_height, screen_width},
 };
 
-pub const GRID_WIDTH: usize = 40;
-pub const GRID_HEIGHT: usize = 30;
+pub const GRID_WIDTH: usize = 80;
+pub const GRID_HEIGHT: usize = 60;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum Tile {
     Empty,
     Wall,
     Character,
+    Coins,
 }
 
 impl Display for Tile {
@@ -22,6 +26,7 @@ impl Display for Tile {
             Tile::Empty => f.write_str("empty"),
             Tile::Wall => f.write_str("wall"),
             Tile::Character => f.write_str("robot"),
+            Tile::Coins => f.write_str("coins"),
         }
     }
 }
@@ -30,14 +35,18 @@ pub struct Grid {
     tiles: [Tile; GRID_WIDTH * GRID_HEIGHT],
     tw: f32,
     th: f32,
+
+    coin_texture: Texture2D,
 }
 
 impl Grid {
-    pub fn new() -> Self {
+    pub async fn new() -> Self {
         let mut this = Self {
             tiles: [Tile::Empty; GRID_WIDTH * GRID_HEIGHT],
             tw: 10.0,
             th: 10.0,
+
+            coin_texture: load_texture("assets/coin.png").await.unwrap(),
         };
         this.gen_bst(
             Rect {
@@ -69,9 +78,22 @@ impl Grid {
                 let tile = self.get(x, y);
                 let x = x as f32 * self.tw;
                 let y = y as f32 * self.th;
+                let r = self.tw.min(self.th) / 2.0;
                 match tile {
                     Tile::Wall => {
                         draw_rectangle(x, y, self.tw, self.th, color::BROWN);
+                    }
+                    Tile::Coins => {
+                        draw_texture_ex(
+                            &self.coin_texture,
+                            x,
+                            y,
+                            color::WHITE,
+                            DrawTextureParams {
+                                dest_size: Some(Vec2::new(self.tw, self.th)),
+                                ..Default::default()
+                            },
+                        );
                     }
                     _ => (),
                 }
