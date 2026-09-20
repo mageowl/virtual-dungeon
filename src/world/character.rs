@@ -5,19 +5,19 @@ use std::{
 };
 
 use macroquad::{
-    color::{self, Color},
+    color::Color,
     math::FloatExt,
-    shapes::{draw_rectangle, draw_rectangle_ex, draw_rectangle_lines},
+    shapes::{draw_rectangle, draw_rectangle_lines},
     text::{TextDimensions, draw_text, measure_text},
     time::get_frame_time,
 };
 
-use super::grid::{self, GRID_HEIGHT, GRID_WIDTH, Grid, Tile};
+use super::grid::{GRID_HEIGHT, GRID_WIDTH, Grid, Tile};
 use crate::interface::{handler::spawn_handler, request::Request, spawn_from_file};
 
 pub enum State {
     WaitingForRequest,
-    Timeout(f32, bool),
+    Timeout { time: f32, should_msg: bool },
     Dying(f32),
 }
 
@@ -98,14 +98,17 @@ impl Character {
             self.x = self.x.lerp(self.tile_pos.0 as f32, 0.2);
             self.y = self.y.lerp(self.tile_pos.1 as f32, 0.2);
             if matches!(grid.get(self.tile_pos.0, self.tile_pos.1), Tile::Empty) {
-                self.state = State::Dying(-20.0);
+                self.kill();
             }
         }
 
         match &mut self.state {
             State::WaitingForRequest => match self.reciever.try_recv() {
                 Ok(Request::Move(dir)) => {
-                    self.state = State::Timeout(0.1, true);
+                    self.state = State::Timeout {
+                        time: 0.1,
+                        should_msg: true,
+                    };
 
                     *grid.get_mut(self.tile_pos.0, self.tile_pos.1) = Tile::Empty;
                     self.tile_pos += dir;
@@ -121,7 +124,10 @@ impl Character {
                     let target = self.tile_pos + dir;
                     if matches!(grid.get(target.0, target.1), Tile::Character) {
                         *grid.get_mut(target.0, target.1) = Tile::Empty;
-                        self.state = State::Timeout(0.5, true);
+                        self.state = State::Timeout {
+                            time: 0.5,
+                            should_msg: true,
+                        };
                         self.points += 3;
                     } else {
                         println!(
@@ -129,7 +135,10 @@ impl Character {
                             self.name
                         );
                         let _ = self.stdin.write(b"invalid\n");
-                        self.state = State::Timeout(0.5, false);
+                        self.state = State::Timeout {
+                            time: 0.5,
+                            should_msg: false,
+                        };
                     }
                 }
                 Ok(Request::Scan(x, y)) => {
@@ -157,10 +166,10 @@ impl Character {
                 Err(TryRecvError::Empty) => (),
                 Err(TryRecvError::Disconnected) => {
                     *grid.get_mut(self.tile_pos.0, self.tile_pos.1) = Tile::Empty;
-                    self.state = State::Dying(-20.0);
+                    self.kill();
                 }
             },
-            State::Timeout(time, should_msg) => {
+            State::Timeout { time, should_msg } => {
                 *time -= get_frame_time();
                 if *time <= 0.0 {
                     if *should_msg {
@@ -184,16 +193,16 @@ impl Character {
 
     const LABEL_FONT_SIZE: u16 = 16;
     pub fn draw(&self, grid: &Grid) {
-        let dx = self.x * grid.tw();
-        let dy = self.y * grid.th();
-        draw_rectangle(dx, dy, grid.tw(), grid.th(), self.color);
+        let dx = self.x * grid.tile_width();
+        let dy = self.y * grid.tile_height();
+        draw_rectangle(dx, dy, grid.tile_width(), grid.tile_height(), self.color);
 
         if !matches!(self.state, State::Dying(_)) {
             draw_rectangle_lines(
-                dx - 3.0 * grid.tw(),
-                dy - 3.0 * grid.th(),
-                grid.tw() * 7.0,
-                grid.th() * 7.0,
+                dx - 3.0 * grid.tile_width(),
+                dy - 3.0 * grid.tile_height(),
+                grid.tile_width() * 7.0,
+                grid.tile_height() * 7.0,
                 3.0,
                 self.color,
             );
@@ -201,7 +210,7 @@ impl Character {
 
         draw_text(
             &self.name,
-            dx + grid.tw() / 2.0 - self.label_size.width / 2.0,
+            dx + grid.tile_width() / 2.0 - self.label_size.width / 2.0,
             dy - 10.0,
             Self::LABEL_FONT_SIZE as f32,
             self.color,
@@ -212,9 +221,9 @@ impl Character {
                 a: sv.time,
                 ..self.color
             };
-            let dx = dx + (sv.offset.0) as f32 * grid.tw();
-            let dy = dy + (sv.offset.1) as f32 * grid.th();
-            draw_rectangle(dx, dy, grid.tw(), grid.th(), color);
+            let dx = dx + (sv.offset.0) as f32 * grid.tile_width();
+            let dy = dy + (sv.offset.1) as f32 * grid.tile_height();
+            draw_rectangle(dx, dy, grid.tile_width(), grid.tile_height(), color);
         }
     }
 
@@ -229,6 +238,11 @@ impl Character {
     }
     pub fn is_dead(&self) -> bool {
         matches!(self.state, State::Dying(_))
+    }
+
+    fn kill(&mut self) {
+        self.state = State::Dying(-20.0);
+        let _ = self.process.kill();
     }
 }
 

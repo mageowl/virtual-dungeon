@@ -40,6 +40,7 @@ async fn main() {
                 }
 
                 if is_key_pressed(KeyCode::L) {
+                    characters.sort_by_key(|c| *c.points());
                     screen = Screen::Leaderboard;
                 }
             }
@@ -70,7 +71,7 @@ fn draw_leaderboard(grid: &mut Grid, characters: &Vec<Character>) {
         screen_width(),
         screen_height(),
         Color {
-            a: 0.5,
+            a: 0.3,
             ..color::BLACK
         },
     );
@@ -79,7 +80,7 @@ fn draw_leaderboard(grid: &mut Grid, characters: &Vec<Character>) {
         50.0,
         30.0,
         500.0,
-        300.0,
+        300_f32.max(30.0 + (20.0 * characters.len() as f32)),
         Color {
             r: 0.05,
             g: 0.05,
@@ -90,9 +91,7 @@ fn draw_leaderboard(grid: &mut Grid, characters: &Vec<Character>) {
 
     draw_text("leaderboard", 50.0, 50.0, 32.0, color::WHITE);
 
-    let mut sorted_characters = characters.iter().collect::<Vec<_>>();
-    sorted_characters.sort_by_key(|c| c.points());
-    for (i, character) in sorted_characters.into_iter().rev().enumerate() {
+    for (i, character) in characters.iter().rev().enumerate() {
         let text = if character.is_dead() {
             format!("[dead] {}: {}pts", character.name(), character.points())
         } else {
@@ -103,7 +102,14 @@ fn draw_leaderboard(grid: &mut Grid, characters: &Vec<Character>) {
             55.0,
             70.0 + (20 * i) as f32,
             16.0,
-            *character.color(),
+            if character.is_dead() {
+                Color {
+                    a: 0.2,
+                    ..*character.color()
+                }
+            } else {
+                *character.color()
+            },
         );
     }
 }

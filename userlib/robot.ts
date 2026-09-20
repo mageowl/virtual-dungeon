@@ -48,3 +48,6 @@ export function dirToCoords(dir: Direction) {
       return [1, 0];
   }
 }
+export function isBlocking(tile: Tile) {
+  return tile == "wall" || tile == "robot";
+}

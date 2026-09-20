@@ -1,10 +1,11 @@
 use super::grid::{Grid, Rect, Tile};
 
-// const BST_MAX_DEPTH: usize = 4;
-// const BST_MIN_DEPTH: usize = 3;
-const BST_MAX_DEPTH: usize = 8;
-const BST_MIN_DEPTH: usize = 7;
-const MIN_ROOM_SIZE: usize = 10;
+const BST_MAX_DEPTH: usize = 4;
+const BST_MIN_DEPTH: usize = 3;
+const MIN_ROOM_SIZE: usize = 5;
+// const BST_MAX_DEPTH: usize = 8;
+// const BST_MIN_DEPTH: usize = 7;
+// const MIN_ROOM_SIZE: usize = 10;
 
 impl Grid {
     pub(super) fn gen_bst(&mut self, rect: Rect, depth: usize) {
@@ -23,10 +24,12 @@ impl Grid {
                 *self.get_mut(rect.x, y) = Tile::Wall;
                 *self.get_mut(rect.x + rect.w - 1, y) = Tile::Wall;
             }
-            while rand::random_bool(0.5) {
+
+            let max_coins = (rect.w * rect.h / 70).max(2);
+            for _ in 0..rand::random_range(max_coins.saturating_sub(2)..max_coins) {
                 *self.get_mut(
-                    rand::random_range(rect.x + 1..rect.x + rect.w - 1),
-                    rand::random_range(rect.y + 1..rect.y + rect.h - 1),
+                    rand::random_range(rect.x + 2..rect.x + rect.w - 2),
+                    rand::random_range(rect.y + 2..rect.y + rect.h - 2),
                 ) = Tile::Coins;
             }
         } else {

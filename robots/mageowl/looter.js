@@ -21,7 +21,7 @@ while (true) {
   }
   
   // Move up to find a wall
-  while (await robot.scan(...robot.dirToCoords(direction)) == "empty") {
+  while (!robot.isBlocking(await robot.scan(...robot.dirToCoords(direction)))) {
     await robot.move(direction);
   }
 
@@ -37,14 +37,14 @@ while (true) {
   let targetX, targetY;
 
   outer: while (true) {
-    if (await robot.scan(...dirToTangent(direction)) == "empty") {
+    if (!robot.isBlocking(await robot.scan(...dirToTangent(direction)))) {
       switch (direction) {
         case "left": direction = "down"; break;
         case "down": direction = "right"; break;
         case "right": direction = "up"; break;
         case "up": direction = "left"; break;
       }
-    } else if (await robot.scan(...robot.dirToCoords(direction)) != "empty") {
+    } else if (robot.isBlocking(await robot.scan(...robot.dirToCoords(direction)))) {
       switch (direction) {
         case "right": direction = "down"; break;
         case "down": direction = "left"; break;

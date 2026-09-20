@@ -63,7 +63,7 @@ while (true) {
   console.log("Stage 1 started");
 
   let direction = ["up", "down", "left", "right"][Math.floor(Math.random() * 4)];
-  while (await robot.scan(...robot.dirToCoords(direction)) === "empty") {
+  while (!robot.isBlocking(await robot.scan(...robot.dirToCoords(direction)))) {
     await robot.move(direction);
   }
 

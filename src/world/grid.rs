@@ -3,16 +3,15 @@ use std::fmt::Display;
 use macroquad::{
     color,
     math::Vec2,
-    shapes::{draw_circle, draw_rectangle},
-    text::draw_text,
-    texture::{DrawTextureParams, Texture2D, draw_texture, draw_texture_ex, load_texture},
+    shapes::draw_rectangle,
+    texture::{DrawTextureParams, Texture2D, draw_texture_ex, load_texture},
     window::{screen_height, screen_width},
 };
 
-pub const GRID_WIDTH: usize = 80;
-pub const GRID_HEIGHT: usize = 60;
-// pub const GRID_WIDTH: usize = 40;
-// pub const GRID_HEIGHT: usize = 30;
+// pub const GRID_WIDTH: usize = 80;
+// pub const GRID_HEIGHT: usize = 60;
+pub const GRID_WIDTH: usize = 40;
+pub const GRID_HEIGHT: usize = 30;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum Tile {
@@ -35,8 +34,8 @@ impl Display for Tile {
 
 pub struct Grid {
     tiles: [Tile; GRID_WIDTH * GRID_HEIGHT],
-    tw: f32,
-    th: f32,
+    tile_width: f32,
+    tile_height: f32,
 
     coin_texture: Texture2D,
 }
@@ -45,8 +44,8 @@ impl Grid {
     pub async fn new() -> Self {
         let mut this = Self {
             tiles: [Tile::Empty; GRID_WIDTH * GRID_HEIGHT],
-            tw: 10.0,
-            th: 10.0,
+            tile_width: 10.0,
+            tile_height: 10.0,
 
             coin_texture: load_texture("assets/coin.png").await.unwrap(),
         };
@@ -70,20 +69,20 @@ impl Grid {
     }
 
     pub fn update(&mut self) {
-        self.tw = screen_width() / GRID_WIDTH as f32;
-        self.th = screen_height() / GRID_HEIGHT as f32;
+        self.tile_width = screen_width() / GRID_WIDTH as f32;
+        self.tile_height = screen_height() / GRID_HEIGHT as f32;
     }
 
     pub fn draw(&self) {
         for x in 0..GRID_WIDTH {
             for y in 0..GRID_HEIGHT {
                 let tile = self.get(x, y);
-                let x = x as f32 * self.tw;
-                let y = y as f32 * self.th;
-                let r = self.tw.min(self.th) / 2.0;
+                let x = x as f32 * self.tile_width;
+                let y = y as f32 * self.tile_height;
+                // let r = self.tile_width.min(self.tile_height) / 2.0;
                 match tile {
                     Tile::Wall => {
-                        draw_rectangle(x, y, self.tw, self.th, color::BROWN);
+                        draw_rectangle(x, y, self.tile_width, self.tile_height, color::BROWN);
                     }
                     Tile::Coins => {
                         draw_texture_ex(
@@ -92,7 +91,7 @@ impl Grid {
                             y,
                             color::WHITE,
                             DrawTextureParams {
-                                dest_size: Some(Vec2::new(self.tw, self.th)),
+                                dest_size: Some(Vec2::new(self.tile_width, self.tile_height)),
                                 ..Default::default()
                             },
                         );
@@ -103,11 +102,11 @@ impl Grid {
         }
     }
 
-    pub fn th(&self) -> f32 {
-        self.th
+    pub fn tile_height(&self) -> f32 {
+        self.tile_height
     }
-    pub fn tw(&self) -> f32 {
-        self.tw
+    pub fn tile_width(&self) -> f32 {
+        self.tile_width
     }
 }
 

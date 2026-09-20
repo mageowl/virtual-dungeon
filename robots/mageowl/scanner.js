@@ -16,7 +16,7 @@ while (true) {
   // Move up to find a wall
   console.log("Stage 1 started");
 
-  while (await robot.scan(0, -1) == "empty") {
+  while (!robot.isBlocking(await robot.scan(0, -1))) {
     await robot.move("up");
   }
 
@@ -30,14 +30,14 @@ while (true) {
   while (targetX == null) {
     await robot.move(direction);
 
-    if (await robot.scan(...dirToTangent(direction)) == "empty") {
+    if (!robot.isBlocking(await robot.scan(...dirToTangent(direction)))) {
       switch (direction) {
         case "right": direction = "up"; break;
         case "down": direction = "right"; break;
         case "left": direction = "down"; break;
         case "up": direction = "left"; break;
       }
-    } else if (await robot.scan(...robot.dirToCoords(direction)) != "empty") {
+    } else if (robot.isBlocking(await robot.scan(...robot.dirToCoords(direction)))) {
       switch (direction) {
         case "right": direction = "down"; break;
         case "down": direction = "left"; break;

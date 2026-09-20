@@ -33,7 +33,11 @@ public class Robot {
     EMPTY,
     ROBOT,
     COINS,
-    WALL,
+    WALL;
+
+    public boolean isBlocking() {
+      return (this == Tile.WALL || this == Tile.ROBOT);
+    }
   }
   public Tile scan(int x, int y) {
     System.out.printf("\0scan %d %d\n", x, y);
@@ -56,4 +60,5 @@ public class Robot {
         return Tile.EMPTY;
     }
   }
+
 }
