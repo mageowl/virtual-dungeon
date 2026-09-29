@@ -5,7 +5,7 @@ use std::{
     thread::{self, JoinHandle},
 };
 
-use super::request::Request;
+use common::Request;
 
 pub fn spawn_handler(
     name: String,

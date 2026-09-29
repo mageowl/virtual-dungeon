@@ -12,8 +12,9 @@ use macroquad::{
     time::get_frame_time,
 };
 
-use super::grid::{GRID_HEIGHT, GRID_WIDTH, Grid, Tile};
-use crate::interface::{handler::spawn_handler, request::Request, spawn_from_file};
+use super::grid::{GRID_HEIGHT, GRID_WIDTH, Grid};
+use crate::interface::{handler::spawn_handler, spawn_from_file};
+use common::{Request, Tile};
 
 pub enum State {
     WaitingForRequest,

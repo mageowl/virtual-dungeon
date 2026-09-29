@@ -11,11 +11,11 @@
       name = "macroquad-shell";
       buildInputs = with pkgs; [
         libGL
-        xorg.libX11
-        xorg.libXi
+        libx11
+        libxi
         libxkbcommon
 
-        jdk24
+        jdk
       ];
 
       shellHook = ''

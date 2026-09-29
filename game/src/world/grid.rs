@@ -1,5 +1,4 @@
-use std::fmt::Display;
-
+use common::Tile;
 use macroquad::{
     color,
     math::Vec2,
@@ -12,25 +11,6 @@ use macroquad::{
 // pub const GRID_HEIGHT: usize = 60;
 pub const GRID_WIDTH: usize = 40;
 pub const GRID_HEIGHT: usize = 30;
-
-#[derive(Clone, Copy, PartialEq, Eq)]
-pub enum Tile {
-    Empty,
-    Wall,
-    Character,
-    Coins,
-}
-
-impl Display for Tile {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Tile::Empty => f.write_str("empty"),
-            Tile::Wall => f.write_str("wall"),
-            Tile::Character => f.write_str("robot"),
-            Tile::Coins => f.write_str("coins"),
-        }
-    }
-}
 
 pub struct Grid {
     tiles: [Tile; GRID_WIDTH * GRID_HEIGHT],

@@ -1,4 +1,6 @@
-use super::grid::{Grid, Rect, Tile};
+use common::Tile;
+
+use super::grid::{Grid, Rect};
 
 const BST_MAX_DEPTH: usize = 4;
 const BST_MIN_DEPTH: usize = 3;

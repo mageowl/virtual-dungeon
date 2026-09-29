@@ -5,7 +5,6 @@ use std::{
 };
 
 pub mod handler;
-pub mod request;
 
 pub fn spawn_from_file(file_name: &str) -> Option<Child> {
     let path = Path::new(file_name);
@@ -17,7 +16,7 @@ pub fn spawn_from_file(file_name: &str) -> Option<Child> {
         }
         Some("java") => {
             cmd = Command::new("java");
-            cmd.args(["-cp", "userlib/java", file_name]);
+            cmd.args(["-cp", "./userlib/java", file_name]);
         }
         Some(e) => {
             println!("[\x1b[31m{file_name}\x1b[0m] Unknown file extension: {e}");
@@ -27,6 +26,7 @@ pub fn spawn_from_file(file_name: &str) -> Option<Child> {
             cmd = Command::new(file_name);
         }
     };
+    dbg!(&cmd);
     match cmd
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
