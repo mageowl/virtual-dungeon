@@ -32,5 +32,10 @@ pub fn do_attack(dir: Direction) {
 
 pub fn do_scan(x: i8, y: i8) -> Tile {
     send(Request::Scan(x, y));
-    Tile::try_from(get_response().as_str()).expect("invalid tile")
+    let response = get_response();
+    if response.starts_with("tile ") && response.ends_with("\n") {
+        Tile::try_from(&response["tile ".len()..response.len() - 1]).expect("invalid tile")
+    } else {
+        panic!("failed to finish scan")
+    }
 }
